@@ -1,0 +1,32 @@
+body{
+    display: flex;
+    height: 100vh;
+    background-color: #f2f2f2;
+}
+
+#navigate {
+    height: 100vh !important;
+    max-width: 90px;
+    flex-shrink: 1; 
+}
+
+#input-section{
+    height: 100vh;
+    max-width: 50vw;
+    min-width: 600px;
+    flex-grow: 1 !important;
+    background-color: #5f6978;
+}
+
+#map-canvas{
+    flex-grow: 1;
+    width: 100%;
+}
+a.d-block {
+    margin-bottom: 30px;
+    font-size: larger;
+    text-align: center;
+    font-weight: bolder; /* Make the text bold */
+    font-family: 'Your Preferred Font', serif; /* Specify a good, normal font */
+    /* Other styles if needed */
+  }

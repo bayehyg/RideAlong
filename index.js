@@ -43,6 +43,37 @@ userSchema.plugin(findOrCreate);
 
 const User = mongoose.model("User", userSchema);
 
+const routeSchema = new mongoose.Schema({
+  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  routeGeoJSON: {
+    type: {
+      type: String,
+      enum: ['LineString'], 
+      required: true
+    },
+    coordinates: {
+      type: [[[Number]]],
+      required: true
+    }
+  },
+});
+
+routeSchema.index({ routeGeoJSON: '2dsphere' }); 
+
+const Route = mongoose.model('Route', routeSchema);
+
+const driverSchema = new mongoose.Schema({
+  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, 
+  name: String,
+  vehicle: String,
+  schedule: [String],
+  routes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Route' }],
+  
+});
+
+const Driver = mongoose.model('Driver', driverSchema);
+
+
 const db = mongoose.connection;
 
 db.on('connected', () => {
@@ -102,9 +133,25 @@ app.get("/auth/google/ridealong",
   passport.authenticate('google', { failureRedirect: "/" }),
   function(req, res) {
     // Successful authentication, redirect home.
-    res.send("<h1> Welcome</h1>");
+    res.sendFile("./views/driver.html");
   });
 
+app.get("/logout", (req, res) => {
+    req.logout();
+    res.redirect("/");
+});
+
+app.get("/requestride", (req, res) => {
+  
+});
+
+app.post("/postroute", (req, res) => {
+  if (req.isAuthenticated()){
+
+  }else{
+    res.redirect("/");
+  }
+});
 // Start the server
 app.listen(port, () => {
     console.log(`Server running on port ${port}`);

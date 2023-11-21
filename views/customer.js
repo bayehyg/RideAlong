@@ -170,7 +170,7 @@ $('#searchBtn').on('click', function() {
   $.ajax({
     type: 'GET',
     url: 'http://localhost/search', 
-    data: {startLocation, destination},
+    data: {start:$('#start-location').val(), end:$('#destination').val()},
     success: function(response) {
 
       console.log(response);
