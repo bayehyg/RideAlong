@@ -22,15 +22,19 @@
   <body>
       
     <div class="container mx-auto mt-4">
-        <h1 class="text-3xl font-bold">Search for Routes</h1>
+      <svg style="margin-bottom: 20px;" viewBox="0 0 150 20" xmlns="http://www.w3.org/2000/svg">
+        <!-- Replace 'logo.png' with your image -->
+        <image href="./assests/ridealong.png" width="100%" height="100%" />
+      </svg>
+        <hr>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
           <div>
-            <label class="block mb-1" for="destination">Destination:</label>
-            <input type="text" class="w-full border rounded-md px-3 py-2" id="destination" placeholder="Enter destination">
+            <label class="block mb-1" for="start-location">Starting Location</label>
+            <input type="text" class="w-full border rounded-md px-3 py-2" id="start-location" placeholder="Enter Staring Location">
           </div>
           <div>
-            <label class="block mb-1" for="timing">Timing:</label>
-            <input type="text" class="w-full border rounded-md px-3 py-2" id="timing" placeholder="Enter timing">
+            <label class="block mb-1" for="destination">Destination</label>
+            <input type="text" class="w-full border rounded-md px-3 py-2" id="destination" placeholder="Enter Destination">
           </div>
         </div>
         <button class="bg-blue-500 text-white font-bold py-2 px-4 mt-4 rounded">Search</button>
@@ -46,11 +50,8 @@
       >
       
       </div>
-    <script src="https://maps.googleapis.com/maps/api/js?key="></script>
-        <script type="text/javascript">
-            
-          </script>
-          <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-          <script src="./main.js"></script>      
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+      <script src="./main.js"></script>
+      <script src="https://maps.googleapis.com/maps/api/js?key=&callback=createMap&libraries=places"  async defer></script>      
   </body>
 </html>
