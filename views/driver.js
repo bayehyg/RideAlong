@@ -111,8 +111,10 @@ function createMap() {
     const destination = document.getElementById('destination');
     const autoStart = new google.maps.places.Autocomplete(startLocation);
     const autoDestination = new google.maps.places.Autocomplete(destination);
+    console.log("hi");
     autoStart.addListener('place_changed', () => {
       const place = autoStart.getPlace();
+      console.log("why not");
       if (!place.geometry) {
         // User entered the name of a Place that was not suggested and
         // pressed the Enter key, or the Place Details request failed.
@@ -131,6 +133,7 @@ function createMap() {
     });
     autoDestination.addListener('place_changed', () => {
       const place = autoDestination.getPlace();
+      console.log(place.geometry.location);
       if (!place.geometry) {
         // User entered the name of a Place that was not suggested and
         // pressed the Enter key, or the Place Details request failed.
@@ -152,31 +155,40 @@ function createMap() {
       }
     });  
     $('#searchBtn').on('click', function() {
-        const directionsDisplay = new google.maps.DirectionsRenderer();
-        directionsDisplay.setMap(this.map);
+        const directionsDisplay = new google.maps.DirectionsRenderer({
+            map: map, 
+            polylineOptions: {
+              strokeColor: 'blue' 
+            }
+          });
         const r = {
-            start: { lat: 40.7128, lng: -74.0060 }, // Example start point (New York City)
-            end: { lat: 34.0522, lng: -118.2437 }, // Example end point (Los Angeles)
-            mode: "DRIVING" // Travel mode: 'driving', 'walking', 'bicycling', or 'transit'
+            start:{
+                    lat: autoStart.getPlace().geometry.location.lat(),
+                    lng: autoStart.getPlace().geometry.location.lng()
+            }, 
+            end:{
+                    lat: autoDestination.getPlace().geometry.location.lat(),
+                    lng: autoDestination.getPlace().geometry.location.lng() 
+                },
+            mode: "DRIVING" 
         };
-        
+        console.log(r);
         var routes = new Routes(r);
-        routes.drawRoute(directionsDisplay);
+        const postData = routes.drawRoute(directionsDisplay, r);
     
-        // $.ajax({
-        //   type: 'Post',
-        //   url: 'http://localhost/postroute', 
-        //   dataType: 'json',
-        //   data: postData,
-        //   success: function(response) {
-      
-        //     console.log(response);
-        //   },
-        //   error: function(error) {
-        //     // Handle any errors
-        //     console.error(error);
-        //   }
-        // });
+        $.ajax({
+          type: 'POST',
+          url: 'http://localhost:3000/postroute', 
+          dataType: 'json',
+          data: JSON.stringify(postData),
+          success: function(response) {
+            console.log(response);
+          },
+          error: function(error) {
+            // Handle any errors
+            console.error(error);
+          }
+        });
       });
     // google.maps.event.addListener(marker, "click", function () {
     //   infowindow.open(map, marker);
@@ -187,20 +199,25 @@ class Routes {
         this.route = route;
         this.directionsService = new google.maps.DirectionsService();
     }
-    drawRoute(directionsDisplay) {
+    drawRoute(directionsDisplay, route) {
         const start = new google.maps.LatLng(this.route.start.lat, this.route.start.lng);  
         const end = new google.maps.LatLng(this.route.end.lat, this.route.end.lng);
         const request = {
             origin: start,
             destination: end,
-            travelMode: this.route.mode
+            travelMode: 'DRIVING'
         };
         this.directionsService.route(request, function(response, status) {
         if (status === 'OK') {
-        
             directionsDisplay.setDirections(response);
+            console.log(route);
+            const data = {
+              start: [route.start.lng, route.start.lat],
+              end: [route.end.lng, route.end.lat]
+            }
+            return data;
         } else {
-        window.alert('Directions request failed due to ' + status);
+            window.alert('Directions request failed due to ' + status);
     }});
 }
 
