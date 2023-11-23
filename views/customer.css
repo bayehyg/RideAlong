@@ -1,0 +1,56 @@
+body{
+  display: flex;
+  height: 100vh;
+}
+
+#navigate {
+  height: 100vh !important;
+  max-width: 90px;
+  flex-shrink: 1; 
+  background-color: #7e3cbc ;
+}
+
+#lists {
+  max-height: 38vh;
+  overflow-y: auto;
+}
+#lists::-webkit-scrollbar {
+  width: 8px;
+  background-color: #F5F5F5;
+}
+
+
+#lists::-webkit-scrollbar-track {
+  box-shadow: inset 0 0 6px rgba(104, 140, 240, 0.3);
+}
+
+#lists::-webkit-scrollbar-thumb {
+  background-color: lightblue;
+  outline: 1px solid slategrey;
+}
+
+#input-section{
+  color: #000000 !important;
+  font-weight: bold !important;
+  height: 100vh;
+  max-width: 30vw;
+  min-width: 20vw;
+  flex-grow: 1 !important;
+  background-color: #EAB308;
+}
+
+#map-canvas{
+  flex-grow: 1;
+  width: 100%;
+}
+a.d-block {
+  margin-bottom: 30px;
+  font-size: larger;
+  text-align: center;
+  font-weight: bolder; /* Make the text bold */
+  font-family: 'Your Preferred Font', serif; /* Specify a good, normal font */
+  /* Other styles if needed */
+}
+#purple-header{
+  color: #0C0C0C !important;
+}

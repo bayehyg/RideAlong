@@ -1,6 +1,7 @@
 const apiUrl = 'https://api.ipgeolocationapi.com/geolocate';
 
-var markers = []; // array of start and destination markers, can not exceed two!
+var markers = []; 
+
 
 // create map
 function createMap() {
@@ -153,57 +154,87 @@ function createMap() {
       map.setCenter(place.geometry.location);
       markers[1] = marker4;
     }
-  });  
+  }); 
+   
   // google.maps.event.addListener(marker, "click", function () {
   //   infowindow.open(map, marker);
   // });
+  $('#searchBtn').on('click', function() {
+    // const sLng = autoStart.getPlace().geometry.location.lng();
+    // const sLat = autoStart.getPlace().geometry.location.lat();
+    // const eLng = autoDestination.getPlace().geometry.location.lng(); 
+    // const eLat = autoDestination.getPlace().geometry.location.lat();
+    
+    
+  
+    $.ajax({
+      type: 'GET',
+      url: `http://localhost:3000/requestride?slat=47.61060260000001&slng=-122.1786378&elat=47.6301172&elng=122.1785289`, 
+      success: function(response) {
+        console.log(response);
+        response.forEach(route => {
+          const list = `<li class="py-3 sm:py-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <img class="w-9 h-9 " src="./assests/blackbird.png" alt="Neil image">
+                    </div>
+                    <div class="flex-1 min-w-0 ms-4">
+                        <p class="text-sm font-medium text-gray-900 truncate dark:text-white">
+                            ${route.name}
+                        </p>
+                        
+                    </div>
+                    <div class="inline-flex items-center text-base font-semibold text-gray-900 dark:text-white">
+                    </div>
+                </div>
+            </li>`
+            $("#lists").append(list);
+        });
+
+      },
+      error: function(error) {
+        // Handle any errors
+        console.error(error);
+      }
+    });
+
+    
+  });
 };
 
 
 // add autocomplete for input fields
 
 
-$('#searchBtn').on('click', function() {
-  const destination = $('#destination').val();
-  const timing = $('#timing').val();
-
-  $.ajax({
-    type: 'GET',
-    url: 'http://localhost/search', 
-    data: {start:$('#start-location').val(), end:$('#destination').val()},
-    success: function(response) {
-
-      console.log(response);
-    },
-    error: function(error) {
-      // Handle any errors
-      console.error(error);
-    }
-  });
-});
 
 
 
 class Routes {
-  constructor(route, map) {
-    this.directionsService = new google.maps.DirectionsService();
-    const directionsDisplay = new google.maps.DirectionsRenderer();
-    directionsDisplay.setMap(map);
+  constructor(route) {
+      this.route = route;
+      this.directionsService = new google.maps.DirectionsService();
   }
-  drawRoute() {
-    const start = new google.maps.LatLng(this.route.start); 
-    const end = new google.maps.LatLng(this.route.end);
-    const request = {
-      origin: start,
-      destination: end,
-      travelMode: this.route.mode
-    };
-    directionsService.route(request, function(response, status) {
-    if (status === 'OK') {
-      directionsDisplay.setDirections(response);
-    } else {
-      window.alert('Directions request failed due to ' + status);
-    }});
-  }
+  drawRoute(directionsDisplay, route) {
+      const start = new google.maps.LatLng(this.route.start.lat, this.route.start.lng);  
+      const end = new google.maps.LatLng(this.route.end.lat, this.route.end.lng);
+      console.log(start);
+      const request = {
+          origin: start,
+          destination: end,
+          travelMode: 'DRIVING'
+      };
+      this.directionsService.route(request, function(response, status) {
+      if (status === 'OK') {
+          directionsDisplay.setDirections(response);
+          console.log(route);
+          const data = {
+            "start": [route.start.lng, route.start.lat],
+            "end": [route.end.lng, route.end.lat]
+          }
+          return data;
+      } else {
+          window.alert('Directions request failed due to ' + status);
+  }});
+}
 
 }

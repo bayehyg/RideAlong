@@ -7,12 +7,15 @@ const passport = require("passport");
 const passportLocalMongoose = require("passport-local-mongoose");
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const findOrCreate = require('mongoose-findorcreate');
+const cors = require('cors');
 require('dotenv').config();
+
 
 const app = express();
 const port = 3000; // Choose your desired port
-app.use(express.static("public"));
+app.use(express.static('views'));
 app.set('view engine', 'ejs');
+app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
   extended: true
@@ -33,8 +36,8 @@ mongoose.connect(uri);
 
 
 const userSchema = new mongoose.Schema ({
+    name: String,
     email: String,
-    password: String,
     googleId: String
   });
   
@@ -44,6 +47,7 @@ userSchema.plugin(findOrCreate);
 const User = mongoose.model("User", userSchema);
 
 const routeSchema = new mongoose.Schema({
+  name: String,
   driver: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   start: {
     type: [Number],
@@ -54,12 +58,13 @@ const routeSchema = new mongoose.Schema({
     required: true
   }
 });
-routeSchema.index({ startGeoJSON: '2d', endGeoJSON: '2d' });
+routeSchema.index({ startGeoJSON: '2dsphear'});
+routeSchema.index({endGeoJSON: '2dsphear' });
 
 const Route = mongoose.model('Route', routeSchema);
 
 const driverSchema = new mongoose.Schema({
-  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, 
+  _id: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, 
   name: String,
   routes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Route' }],
   
@@ -94,10 +99,13 @@ passport.serializeUser(function(user, done) {
   done(null, user.id);
 });
 
-passport.deserializeUser(function(id, done) {
-  User.findById(id, function(err, user) {
-    done(err, user);
-  });
+passport.deserializeUser(async function(id, done) {
+  try {
+    const user = await User.findById(id);
+    done(null, user);
+  } catch (err) {
+    done(err, null);
+  }
 });
 passport.use(new GoogleStrategy({
     clientID: process.env.CLIENT_ID,
@@ -106,15 +114,15 @@ passport.use(new GoogleStrategy({
   },
   function(accessToken, refreshToken, profile, cb) {
     console.log(profile)
-    User.findOrCreate({ googleId: profile.id }, function (err, user) {
+    User.findOrCreate({ name: profile.displayName, googleId: profile.id }, function (err, user) {
       return cb(err, user);
     });
   }
 ));
 
-// Define a route for the login page
+
 app.get('/', (req, res) => {
-    res.sendFile(__dirname + '/views/login.html'); // Change the path to your login page HTML file
+    res.render("login");
 });
 
 app.get("/auth/google", 
@@ -127,24 +135,49 @@ app.get("/auth/google/ridealong",
   passport.authenticate('google', { failureRedirect: "/" }),
   function(req, res) {
     // Successful authentication, redirect home.
-    res.sendFile("./views/driver.html");
+    res.redirect("/logout");
   });
 
 app.get("/logout", (req, res) => {
-    req.logout();
-    res.redirect("/");
+    res.render("driver");
 });
 
 app.get("/requestride", (req, res) => {
-  
+  const startc = [req.query.slng, req.query.slat];
+  const endc = [req.query.elng, req.query.elat];
+  Route.find({
+    $and: [
+      {
+        start: {
+          $geoWithin: {
+            $centerSphere: [ startc, 1000 ]
+          }
+        }
+      },
+      {
+        end: {
+          $geoWithin: {
+            $centerSphere: [ endc, 1000 ]
+          }
+        }
+      }
+    ]
+  }).then(results => {
+    console.log(results); // This will log the matched routes
+    res.send(results);
+  }).catch(error => {
+    console.error(error); // Log any errors that occur during the query
+    res.sendStatus(500);
+  });
 });
 
 app.post("/postroute", async (req, res) => {
   console.log(req.body);
   const newRoute = new Route({
+    name: 'yonatan',
     driver: '655a6fc1ceac5ea7046d5e4c',
-    start: req.body.start,
-    end: req.body.end
+    start: [req.body.start.lng, req.body.start.lat],
+    end: [req.body.end.lng, req.body.end.lat]
   });
   console.log(newRoute);
   try {
@@ -153,7 +186,7 @@ app.post("/postroute", async (req, res) => {
     let driver = await Driver.findById('655a6fc1ceac5ea7046d5e4c');
     if (!driver) {
       driver = new Driver({
-        user: '655a6fc1ceac5ea7046d5e4c',
+        _id: '655a6fc1ceac5ea7046d5e4c',
         routes: [savedRoute._id],
       });
     } else {
@@ -161,7 +194,7 @@ app.post("/postroute", async (req, res) => {
     }
     await driver.save();
 
-    res.status(201).json({ message: 'Route created successfully', route: savedRoute });
+    res.status(200).json({ message: 'Route created successfully', route: savedRoute });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Error creating route' });

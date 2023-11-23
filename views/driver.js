@@ -166,28 +166,37 @@ function createMap() {
                     lat: autoStart.getPlace().geometry.location.lat(),
                     lng: autoStart.getPlace().geometry.location.lng()
             }, 
-            end:{
+            end:{ 
                     lat: autoDestination.getPlace().geometry.location.lat(),
                     lng: autoDestination.getPlace().geometry.location.lng() 
                 },
             mode: "DRIVING" 
         };
-        console.log(r);
+        
         var routes = new Routes(r);
         const postData = routes.drawRoute(directionsDisplay, r);
-    
-        $.ajax({
-          type: 'POST',
-          url: 'http://localhost:3000/postroute', 
-          dataType: 'json',
-          data: JSON.stringify(postData),
-          success: function(response) {
-            console.log(response);
+        console.log(postData);
+        fetch('http://localhost:3000/postroute', {
+          method: 'POST', 
+          headers: {
+              'Content-Type': 'application/json',
+              'Access-Control-Allow-Origin': '*',
+              'Access-Control-Allow-Credentials': 'true'
           },
-          error: function(error) {
-            // Handle any errors
-            console.error(error);
-          }
+          body: JSON.stringify(r),
+          })
+          .then(response => {
+              if (!response.ok) {
+                  throw new Error('Network response was not ok');
+              }
+              return response.json();
+              })
+          .then(data => {
+              console.log('Route posted successfully:', data);
+          })
+          .catch(error => {
+              // Handle errors here
+              console.error('Error posting route:', error);
         });
       });
     // google.maps.event.addListener(marker, "click", function () {
@@ -202,6 +211,7 @@ class Routes {
     drawRoute(directionsDisplay, route) {
         const start = new google.maps.LatLng(this.route.start.lat, this.route.start.lng);  
         const end = new google.maps.LatLng(this.route.end.lat, this.route.end.lng);
+        console.log(start);
         const request = {
             origin: start,
             destination: end,
@@ -212,8 +222,8 @@ class Routes {
             directionsDisplay.setDirections(response);
             console.log(route);
             const data = {
-              start: [route.start.lng, route.start.lat],
-              end: [route.end.lng, route.end.lat]
+              "start": [route.start.lng, route.start.lat],
+              "end": [route.end.lng, route.end.lat]
             }
             return data;
         } else {

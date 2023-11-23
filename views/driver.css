@@ -1,21 +1,22 @@
 body{
     display: flex;
     height: 100vh;
-    background-color: #f2f2f2;
 }
 
 #navigate {
     height: 100vh !important;
     max-width: 90px;
     flex-shrink: 1; 
+    background-color: #7e3cbc ;
 }
 
 #input-section{
+    color: #D1D7E0 !important;
     height: 100vh;
-    max-width: 50vw;
-    min-width: 600px;
+    max-width: 30vw;
+    min-width: 20vw;
     flex-grow: 1 !important;
-    background-color: #5f6978;
+    background-color: #3c3b41;
 }
 
 #map-canvas{
@@ -29,4 +30,7 @@ a.d-block {
     font-weight: bolder; /* Make the text bold */
     font-family: 'Your Preferred Font', serif; /* Specify a good, normal font */
     /* Other styles if needed */
-  }
+}
+#purple-header{
+    color: #EAB308 !important;
+}
