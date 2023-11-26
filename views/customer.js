@@ -201,7 +201,7 @@ function createMap() {
       type: 'GET',
       CORS: true,
       secure: true,
-      url: `http://localhost:3000/requestride?slat=${sLat}&slng=${sLng}&elat=${eLat}&elng=${eLng}`, 
+      url: `https://ec2-52-10-199-239.us-west-2.compute.amazonaws.com/requestride?slat=${sLat}&slng=${sLng}&elat=${eLat}&elng=${eLng}`, 
       success: async function(res) {    
         
         //const goodRoutes = await findGoodRoutes(res, autoStart.getPlace().geometry.location, autoDestination.getPlace().geometry.location);  not working now will

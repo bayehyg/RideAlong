@@ -126,7 +126,7 @@ const transporter = nodemailer.createTransport({
 passport.use(new GoogleStrategy({
     clientID: process.env.CLIENT_ID,
     clientSecret: process.env.CLIENT_SECRET,
-    callbackURL: "http://localhost:3000/auth/google/ridealong",
+    callbackURL: "https://ec2-52-10-199-239.us-west-2.compute.amazonaws.com/auth/google/ridealong",
   },
    async function(accessToken, refreshToken, profile, cb) {
     console.log(profile)
@@ -198,7 +198,7 @@ app.get("/auth/google/ridealong",
 
 app.get("/customer", (req, res) => {
   if(req.isAuthenticated()){
-    res.render("customer", {name: req.user.name.split(" ")[0] , picture: req.user.picture});
+    res.render("customer", {name: req.user.name.split(" ")[0] , picture: req.user.picture, key: process.env.MAPS_API});
   } else {
     res.redirect("/");
   }
@@ -206,7 +206,7 @@ app.get("/customer", (req, res) => {
 
 app.get("/driver", (req, res) => {
   if(req.isAuthenticated()){
-    res.render("driver", {name: req.user.username, picture: req.user.picture});
+    res.render("driver", {name: req.user.username, picture: req.user.picture, key: process.env.MAPS_API});
   }else {
     res.redirect("/");
   }

@@ -69,13 +69,7 @@ function createMap() {
     map = new google.maps.Map(map, mapOptions);
   
   
-    const contentString =
-      '<div class="info-window-content"><h2>Notus JS</h2>' +
-      "<p>A beautiful Dashboard for Bootstrap 4. It is Free and Open Source.</p></div>";
-  
-    const infowindow = new google.maps.InfoWindow({
-      content: contentString,
-    });
+    
   
     
     function mark(coordinates){
@@ -182,7 +176,7 @@ function createMap() {
         var routes = new Routes(r);
         const postData = routes.drawRoute(directionsDisplay, r);
         console.log(postData);
-        fetch('http://localhost:3000/postroute', {
+        fetch('https://ec2-52-10-199-239.us-west-2.compute.amazonaws.com/postroute', {
           method: 'POST', 
           headers: {
               'Content-Type': 'application/json',
