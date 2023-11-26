@@ -176,7 +176,7 @@ function createMap() {
         var routes = new Routes(r);
         const postData = routes.drawRoute(directionsDisplay, r);
         console.log(postData);
-        fetch('https://ec2-52-10-199-239.us-west-2.compute.amazonaws.com/postroute', {
+        fetch('http://52.10.199.239:80/postroute', {
           method: 'POST', 
           headers: {
               'Content-Type': 'application/json',

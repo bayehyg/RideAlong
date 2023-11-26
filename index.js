@@ -13,7 +13,7 @@ require('dotenv').config();
 
 
 const app = express();
-const port = 3000; // Choose your desired port
+const port = 80; // Choose your desired port
 app.use(express.static('views'));
 app.set('view engine', 'ejs');
 app.use(cors({origin: '*'}));
@@ -126,7 +126,7 @@ const transporter = nodemailer.createTransport({
 passport.use(new GoogleStrategy({
     clientID: process.env.CLIENT_ID,
     clientSecret: process.env.CLIENT_SECRET,
-    callbackURL: "https://ec2-52-10-199-239.us-west-2.compute.amazonaws.com/auth/google/ridealong",
+    callbackURL: "http://52.10.199.239:80/auth/google/ridealong",
   },
    async function(accessToken, refreshToken, profile, cb) {
     console.log(profile)
