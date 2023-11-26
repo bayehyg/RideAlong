@@ -3,6 +3,17 @@ body{
     height: 100vh;
 }
 
+#popup-modal{
+    display: none;
+    margin-bottom: 10%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    backdrop-filter: blur(5px);;
+  }
+
 #navigate {
     height: 100vh !important;
     max-width: 90px;

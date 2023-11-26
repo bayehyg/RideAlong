@@ -1,5 +1,12 @@
 var markers = [];
 
+$('#closeBtn').on('click', function() {
+  $('#popup-modal').css('display', 'none');
+});
+$('#xBtn').on('click', function() {
+  $('#popup-modal').css('display', 'none');
+});
+
 function createMap() {
     /* Map initialisation */
     let map = document.getElementById("map-canvas");
@@ -128,6 +135,7 @@ function createMap() {
           title: "Starting Location",
         });
         map.setCenter(place.geometry.location);
+        markers[0].setMap(null);
         markers[0] = marker3;
       }
     });
@@ -135,7 +143,6 @@ function createMap() {
       const place = autoDestination.getPlace();
       console.log(place.geometry.location);
       if (!place.geometry) {
-        // User entered the name of a Place that was not suggested and
         // pressed the Enter key, or the Place Details request failed.
         window.alert("No details available for input: '" + place.name + "'");
         return;
@@ -145,21 +152,20 @@ function createMap() {
           map: map,
           animation: google.maps.Animation.DROP,
           icon: {
-            url: './assests/map-icon.png', // Change the color here
-            scaledSize: new google.maps.Size(40, 40) // Size of the icon
+            url: './assests/map-icon.png', 
+            scaledSize: new google.maps.Size(40, 40)
           },
           title: "destination",
         });
         map.setCenter(place.geometry.location);
+        markers[1].setMap(null);
         markers[1] = marker4;
       }
     });  
     $('#searchBtn').on('click', function() {
         const directionsDisplay = new google.maps.DirectionsRenderer({
             map: map, 
-            polylineOptions: {
-              strokeColor: 'blue' 
-            }
+            suppressMarkers: true
           });
         const r = {
             start:{
@@ -192,7 +198,8 @@ function createMap() {
               return response.json();
               })
           .then(data => {
-              console.log('Route posted successfully:', data);
+              $('#popup-modal').css('display', 'flex'); 
+              console.log('Route posted successfully:', r);
           })
           .catch(error => {
               // Handle errors here

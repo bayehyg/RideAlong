@@ -13,30 +13,55 @@ body{
 #lists {
   max-height: 38vh;
   overflow-y: auto;
+  overflow-x: hidden;
 }
 #lists::-webkit-scrollbar {
-  width: 8px;
+  width: 4px;
   background-color: #F5F5F5;
 }
 
+#popup-modal{
+  display: none;
+  margin-bottom: 10%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  backdrop-filter: blur(5px);;
+}
+
+#chooseBtn{
+  width: 2rem !important;
+  height: 1rem;
+}
+#tick {
+  transition: transform 0.3s;
+}
+#tick:hover {  
+  transform: rotate(360deg);
+}
 
 #lists::-webkit-scrollbar-track {
   box-shadow: inset 0 0 6px rgba(104, 140, 240, 0.3);
 }
 
 #lists::-webkit-scrollbar-thumb {
-  background-color: lightblue;
+  background-color: rgb(158, 150, 150);
   outline: 1px solid slategrey;
 }
 
 #input-section{
-  color: #000000 !important;
   font-weight: bold !important;
   height: 100vh;
-  max-width: 30vw;
-  min-width: 20vw;
+  max-width: 40vw !important;
+  min-width: 30vw !important;
   flex-grow: 1 !important;
-  background-color: #EAB308;
+  background-color: #183658;
+}
+label{
+  color: #fffefe;
+  margin-bottom: 30px !important;
 }
 
 #map-canvas{
@@ -47,10 +72,10 @@ a.d-block {
   margin-bottom: 30px;
   font-size: larger;
   text-align: center;
-  font-weight: bolder; /* Make the text bold */
-  font-family: 'Your Preferred Font', serif; /* Specify a good, normal font */
-  /* Other styles if needed */
+  font-weight: bolder; 
 }
 #purple-header{
-  color: #0C0C0C !important;
+  margin-top: 0;
+  font-size: 2.5em;
+  color: #E25A44 !important;
 }

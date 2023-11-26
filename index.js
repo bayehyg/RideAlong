@@ -8,6 +8,7 @@ const passportLocalMongoose = require("passport-local-mongoose");
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const findOrCreate = require('mongoose-findorcreate');
 const cors = require('cors');
+const nodemailer = require('nodemailer');
 require('dotenv').config();
 
 
@@ -15,7 +16,7 @@ const app = express();
 const port = 3000; // Choose your desired port
 app.use(express.static('views'));
 app.set('view engine', 'ejs');
-app.use(cors());
+app.use(cors({origin: '*'}));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
   extended: true
@@ -37,6 +38,7 @@ mongoose.connect(uri);
 
 const userSchema = new mongoose.Schema ({
     name: String,
+    picture: String,
     email: String,
     googleId: String
   });
@@ -49,6 +51,7 @@ const User = mongoose.model("User", userSchema);
 const routeSchema = new mongoose.Schema({
   name: String,
   driver: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  driverPicture: String,
   start: {
     type: [Number],
     required: true
@@ -66,6 +69,7 @@ const Route = mongoose.model('Route', routeSchema);
 const driverSchema = new mongoose.Schema({
   _id: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, 
   name: String,
+  picture: String,
   routes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Route' }],
   
 });
@@ -107,101 +111,188 @@ passport.deserializeUser(async function(id, done) {
     done(err, null);
   }
 });
+const transporter = nodemailer.createTransport({
+  host: 'smtp.gmail.com',
+  service: 'gmail',
+  port: 587,
+  secure: false,
+  requireTLS: true,
+  auth: {
+    user: 'ridealong.team.official@gmail.com',   
+    pass: process.env.EMAIL_PASS
+  },
+  from: 'ridealong.team.official@gmail.com', 
+});
 passport.use(new GoogleStrategy({
     clientID: process.env.CLIENT_ID,
     clientSecret: process.env.CLIENT_SECRET,
     callbackURL: "http://localhost:3000/auth/google/ridealong",
   },
-  function(accessToken, refreshToken, profile, cb) {
+   async function(accessToken, refreshToken, profile, cb) {
     console.log(profile)
-    User.findOrCreate({ name: profile.displayName, googleId: profile.id }, function (err, user) {
-      return cb(err, user);
-    });
+    const user = await User.findOne({ googleId: profile.id });
+    if (!user) {
+      const newUser = new User({
+        email: profile.emails[0].value,
+        username: profile.name.givenName,
+        name: profile.displayName,
+        googleId: profile.id,
+        picture: profile.photos[0].value
+      });
+      
+      try {
+        const savedUser = await newUser.save();
+
+        ejs.renderFile('views/mail.ejs', {name: newUser.username}, (err, compiledHtml) => {
+          if (err) {
+            console.log('Error rendering template:', err);
+          } else {
+            // Email content
+            const mailOptions = {
+              from: 'Ride Along team<ridealong.team.official@gmail.com>', 
+              to: savedUser.email, 
+              subject: "Welcome To Ride Along" ,
+              html: compiledHtml
+            };
+        
+            // Send email
+            transporter.sendMail(mailOptions, (error, info) => {
+              if (error) {
+                console.log('Error occurred:', error);
+              } else {
+                console.log('Email sent:', info.response);
+              }
+            });
+          }
+        });
+        
+        return cb(null, savedUser);
+      } catch (error) {
+        return cb(error);
+      }
+    } else {
+      // User already exists, return the user
+      return cb(null, user);
+    }
+    
+    
   }
 ));
-
 
 app.get('/', (req, res) => {
     res.render("login");
 });
 
 app.get("/auth/google", 
-    passport.authenticate('google', { scope: ['profile'] }, (err, user) => {
+    passport.authenticate('google', { scope: ['profile', 'email'] }, (err, user) => {
         if(err) res.redirect("/");
     })
 );
 
-app.get("/auth/google/ridealong", 
+app.get("/auth/google/ridealong",
   passport.authenticate('google', { failureRedirect: "/" }),
   function(req, res) {
     // Successful authentication, redirect home.
-    res.redirect("/logout");
+    res.redirect("/customer");
   });
 
-app.get("/logout", (req, res) => {
-    res.render("driver");
-});
-
-app.get("/requestride", (req, res) => {
-  const startc = [req.query.slng, req.query.slat];
-  const endc = [req.query.elng, req.query.elat];
-  Route.find({
-    $and: [
-      {
-        start: {
-          $geoWithin: {
-            $centerSphere: [ startc, 1000 ]
-          }
-        }
-      },
-      {
-        end: {
-          $geoWithin: {
-            $centerSphere: [ endc, 1000 ]
-          }
-        }
-      }
-    ]
-  }).then(results => {
-    console.log(results); // This will log the matched routes
-    res.send(results);
-  }).catch(error => {
-    console.error(error); // Log any errors that occur during the query
-    res.sendStatus(500);
-  });
-});
-
-app.post("/postroute", async (req, res) => {
-  console.log(req.body);
-  const newRoute = new Route({
-    name: 'yonatan',
-    driver: '655a6fc1ceac5ea7046d5e4c',
-    start: [req.body.start.lng, req.body.start.lat],
-    end: [req.body.end.lng, req.body.end.lat]
-  });
-  console.log(newRoute);
-  try {
-    const savedRoute = await newRoute.save();
-
-    let driver = await Driver.findById('655a6fc1ceac5ea7046d5e4c');
-    if (!driver) {
-      driver = new Driver({
-        _id: '655a6fc1ceac5ea7046d5e4c',
-        routes: [savedRoute._id],
-      });
-    } else {
-      driver.routes.push(savedRoute._id);
-    }
-    await driver.save();
-
-    res.status(200).json({ message: 'Route created successfully', route: savedRoute });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Error creating route' });
+app.get("/customer", (req, res) => {
+  if(req.isAuthenticated()){
+    res.render("customer", {name: req.user.name.split(" ")[0] , picture: req.user.picture});
+  } else {
+    res.redirect("/");
   }
 });
 
-// Start the server
+app.get("/driver", (req, res) => {
+  if(req.isAuthenticated()){
+    res.render("driver", {name: req.user.username, picture: req.user.picture});
+  }else {
+    res.redirect("/");
+  }
+});
+
+app.get("/requestride", (req, res) => {
+  if(req.isAuthenticated()){
+    const startc = [req.query.slng, req.query.slat];
+    const endc = [req.query.elng, req.query.elat];
+    Route.find({
+      $and: [
+        {
+          start: {
+            $geoWithin: {
+              $centerSphere: [ startc, 500 ]
+            }
+          }
+        },
+        {
+          end: {
+            $geoWithin: {
+              $centerSphere: [ endc, 250 ]
+            }
+          }
+        }
+      ]
+    }).then(results => {
+      console.log(results); 
+      res.setHeader('Access-Control-Allow-Origin', '*');
+      res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE');
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+      res.status(200).json(results);
+    }).catch(error => {
+      console.error(error); 
+      res.sendStatus(500);
+    });
+  }else{
+    res.redirect("/");
+  }
+
+}
+);
+
+app.post("/postroute", async (req, res) => {
+  if(req.isAuthenticated()){
+    console.log(req.body);
+    const newRoute = new Route({
+      name: req.user.name,
+      driver: req.user._id,
+      driverPicture: req.user.picture,
+      start: [req.body.start.lng, req.body.start.lat],
+      end: [req.body.end.lng, req.body.end.lat]
+    });
+    console.log(newRoute);
+    try {
+      const savedRoute = await newRoute.save();
+      let driver = await Driver.findById(req.user._id);
+      if (!driver) {
+        driver = new Driver({
+          _id: req.user._id,
+          picture: req.user.picture,
+          routes: [savedRoute._id],
+        });
+      } else {
+        driver.routes.push(savedRoute._id);
+      }
+      await driver.save();
+
+      res.status(200).json({ message: 'Route created successfully', route: savedRoute });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Error creating route' });
+    }
+  }else{
+    res.redirect("/");
+  }
+});
+
+app.get("/logout", (req, res) => {
+  req.logout(function(err) {
+    if (err) { console.log(err); }
+    res.redirect('/');
+  });
+});
+
+
 app.listen(port, () => {
     console.log(`Server running on port ${port}`);
 });

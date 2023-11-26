@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to Ride Along</title>
+    <style>
+        /* Reset some default styles */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #18b490;
+        }
+
+        /* Wrapper for the content */
+        .wrapper {
+            width: 80%;
+            margin: auto;
+            padding: 20px;
+            background-color:#183658;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Header styles */
+        header {
+            font-size: 1.25rem;
+            font-family: sans-serif;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        header h1 {
+            color: #E25A44;
+        }
+
+        /* Main content styles */
+        .content {
+            padding: 20px;
+        }
+
+        /* Button styles */
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #E25A44;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+
+        .button:hover {
+            background-color: #42b300;
+        }
+    </style>
+</head>
+
+<body style="background-color: #183658;">
+    <div class="wrapper">
+        <header>
+            <h1>Welcome to RIDE ALONG! 🥳 🥳</h1>
+        </header>
+        <div class="content">
+            <p>Dear <%= name%>,</p>
+            <p>Thank you for choosing to commute with us.</p>
+            <p>Explore our website and discover interesting people that share a destination.</p>
+            <p>Click the button below to get started:</p>
+            <a href="[AppLink]" class="button">Explore Now</a>
+            <p>If you have any questions or need assistance, feel free to contact us.</p>
+            <p>Best regards,<br> The Ride Along Team.</p>
+        </div>
+    </div>
+</body>
+
+</html>
