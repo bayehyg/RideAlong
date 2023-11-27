@@ -186,9 +186,11 @@ passport.use(new GoogleStrategy({
     
   }
 ));
-
+app.get('', (req, res) => {
+  res.render("login");
+});
 app.get('/', (req, res) => {
-    res.render("login");
+  res.render("login");
 });
 
 app.get("/auth/google", 
