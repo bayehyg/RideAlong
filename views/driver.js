@@ -176,7 +176,7 @@ function createMap() {
         var routes = new Routes(r);
         const postData = routes.drawRoute(directionsDisplay, r);
         console.log(postData);
-        fetch('http://52.10.199.239:80/postroute', {
+        fetch('https://52.10.199.239/postroute', {
           method: 'POST', 
           headers: {
               'Content-Type': 'application/json',
