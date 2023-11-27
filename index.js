@@ -10,10 +10,11 @@ const findOrCreate = require('mongoose-findorcreate');
 const cors = require('cors');
 const nodemailer = require('nodemailer');
 require('dotenv').config();
-
+const fs = require('fs');
+const https = require('https');
 
 const app = express();
-const port = 80; // Choose your desired port
+const port = 443; // Choose your desired port
 app.use(express.static('views'));
 app.set('view engine', 'ejs');
 app.use(cors({origin: '*'}));
@@ -36,6 +37,13 @@ const uri = `mongodb+srv://getanehyonatan:${process.env.MONGO_PASS}@cluster0.vyc
 mongoose.connect(uri);
 
 
+
+const httpsOptions = {
+  cert: fs.readFileSync('./cert.crt'),
+  ca: fs.readFileSync('./bundle.ca-bundle'),
+  key: fs.readFileSync('./pvKey.key')
+};
+const server = https.createServer(httpsOptions, app);
 const userSchema = new mongoose.Schema ({
     name: String,
     picture: String,
@@ -126,7 +134,7 @@ const transporter = nodemailer.createTransport({
 passport.use(new GoogleStrategy({
     clientID: process.env.CLIENT_ID,
     clientSecret: process.env.CLIENT_SECRET,
-    callbackURL: "http://52.10.199.239:80/auth/google/ridealong",
+    callbackURL: "https://rideealong.co/auth/google/ridealong",
   },
    async function(accessToken, refreshToken, profile, cb) {
     console.log(profile)
@@ -293,6 +301,6 @@ app.get("/logout", (req, res) => {
 });
 
 
-app.listen(port, () => {
-    console.log(`Server running on port ${port}`);
+server.listen(port, () => {
+    console.log(`Https server running on port ${port}`);
 });
