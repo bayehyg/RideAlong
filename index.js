@@ -69,8 +69,8 @@ const routeSchema = new mongoose.Schema({
     required: true
   }
 });
-routeSchema.index({ startGeoJSON: '2dsphear'});
-routeSchema.index({endGeoJSON: '2dsphear' });
+routeSchema.index({ start: '2dsphear'});
+routeSchema.index({ end: '2dsphear' });
 
 const Route = mongoose.model('Route', routeSchema);
 
