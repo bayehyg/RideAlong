@@ -37,7 +37,7 @@ const uri = `mongodb+srv://getanehyonatan:${process.env.MONGO_PASS}@cluster0.vyc
 mongoose.connect(uri);
 
 
-
+const hostName = 'rideealong.co';
 const httpsOptions = {
   cert: fs.readFileSync('./cert.crt'),
   ca: fs.readFileSync('./bundle.ca-bundle'),
@@ -303,6 +303,6 @@ app.get("/logout", (req, res) => {
 });
 
 
-server.listen(port, () => {
-    console.log(`Https server running on port ${port}`);
+server.listen(port, hostName, () => {
+  console.log(`Server running at http://${hostName}:${port}/`);
 });
