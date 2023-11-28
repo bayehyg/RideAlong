@@ -1,2 +1,2 @@
 # RideAlong
-A website that lets you connect drivers with their own schedules to customers needing a ride. This website was designed to solve the shortage of transportation in Ethiopia. Drivers can set their own routes and pickup users going the same way or part of the way to earn a little bit on the side.
+A carpool website that was designed originally for campus students commuting. You can post rides if you have a car and bring people along with you or if you don't have a car and you are looking for a ride you can search rides by location and destination.
