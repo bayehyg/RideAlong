@@ -69,8 +69,8 @@ const routeSchema = new mongoose.Schema({
     required: true
   }
 });
-routeSchema.index({ start: '2dsphear'});
-routeSchema.index({ end: '2dsphear' });
+routeSchema.index({ start: '2d'});
+routeSchema.index({ end: '2d' });
 
 const Route = mongoose.model('Route', routeSchema);
 
