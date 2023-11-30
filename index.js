@@ -303,6 +303,6 @@ app.get("/logout", (req, res) => {
 });
 
 
-server.listen(port, hostName, () => {
+server.listen(port, () => {
   console.log(`Server running at http://${hostName}:${port}/`);
 });
