@@ -3,7 +3,7 @@
 Welcome to RideAlong – the carpooling platform designed to simplify your commute!
 
 Visit the live site: [RideAlong](https://rideealong.co)
-![Ride Along]([image_URL](https://yonatanbayeh.netlify.app/resources/ridealong.png))
+![Ride Along](https://raw.githubusercontent.com/bayehyg/Personal-Site/main/resources/ridealong.png)
 
 
 ## Features
