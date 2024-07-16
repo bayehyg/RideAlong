@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const mongoDB = 'mongodb://your_username:your_password@your_host:your_port/your_database';
+const mongoDB = '';
 
 // Connect to MongoDB
 mongoose.connect(mongoDB, { useNewUrlParser: true, useUnifiedTopology: true });
@@ -22,8 +22,7 @@ const RideOrderSchema = new Schema({
     createdAt: { type: Date, default: Date.now }
 });
 
-// Compile model from schema
-const RideOrder = mongoose.model('RideOrder', RideOrderSchema);
+const order = mongoose.model('RideOrder', RideOrderSchema);
 
 // Function to get all ride orders
 const getRideOrders = async () => {
