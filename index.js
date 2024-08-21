@@ -12,9 +12,9 @@ const nodemailer = require('nodemailer');
 require('dotenv').config();
 const fs = require('fs');
 const https = require('https');
-
+const http = require('http');
 const app = express();
-const port = 443; // Choose your desired port
+const port = 443;
 app.use(express.static('views'));
 app.set('view engine', 'ejs');
 app.use(cors({origin: '*'}));
@@ -36,14 +36,15 @@ const uri = `mongodb+srv://getanehyonatan:${process.env.MONGO_PASS}@cluster0.vyc
 
 mongoose.connect(uri);
 
-
-const hostName = 'rideealong.co';
-const httpsOptions = {
-  cert: fs.readFileSync('./cert.crt'),
-  ca: fs.readFileSync('./bundle.ca-bundle'),
-  key: fs.readFileSync('./pvKey.key')
-};
-const server = https.createServer(httpsOptions, app);
+// TODO: uncomment this
+// const hostName = 'rideealong.co';
+// const httpsOptions = {
+//   cert: fs.readFileSync('./cert.crt'),
+//   ca: fs.readFileSync('./bundle.ca-bundle'),
+//   key: fs.readFileSync('./pvKey.key')
+// };
+//const server = https.createServer(httpsOptions, app);
+const server = http.createServer(app);
 const userSchema = new mongoose.Schema ({
     name: String,
     picture: String,
@@ -192,6 +193,9 @@ app.get('', (req, res) => {
 app.get('/', (req, res) => {
   res.render("login");
 });
+app.get("/orders", (req,res) => {
+  res.render("rides")
+});
 
 app.get("/auth/google", 
     passport.authenticate('google', { scope: ['profile', 'email'] }, (err, user) => {
@@ -302,7 +306,8 @@ app.get("/logout", (req, res) => {
   });
 });
 
-
-server.listen(port, () => {
-  console.log(`Server running at http://${hostName}:${port}/`);
+// TODO: change to port variable
+server.listen(3000, () => {
+  console.log(`Server running at http://localhost:3000/`);
+  //console.log(`Server running at http://${hostName}:${port}/`);
 });
