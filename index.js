@@ -68,6 +68,11 @@ const routeSchema = new mongoose.Schema({
   end: {
     type: [Number],
     required: true
+  },
+  passengers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  time: {
+    type: Date,
+    required: true
   }
 });
 routeSchema.index({ start: '2d'});
@@ -194,6 +199,7 @@ app.get('/', (req, res) => {
   res.render("login");
 });
 app.get("/orders", (req,res) => {
+  
   res.render("rides")
 });
 
@@ -218,6 +224,44 @@ app.get("/customer", (req, res) => {
   }
 });
 
+app.get('/orders/postedRides', async (req, res) => {
+  // if (!req.isAuthenticated()) {
+  //   return res.status(401).json({ message: 'Unauthorized' });
+  // }
+  req.user = {
+    _id: '6561eb39658864b2b2a8686f'  // TODO: Remove this
+  };
+  const userId = req.user._id;
+
+  try {
+    const postedRides = await Route.find({ driver: userId })
+      .populate('passengers', 'name driverPicture'); 
+    res.status(200).json(postedRides);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error fetching posted rides' });
+  }
+});
+
+app.get('/orders/reservedRides', async (req, res) => {
+  // if (!req.isAuthenticated()) {
+  //   return res.status(401).json({ message: 'Unauthorized' });
+  // }
+
+  //const userId = req.user._id;
+
+  try {
+    // TODO: change the hardcoded userid to {userId}
+    const reservedRides = await Route.find({ passengers: userId })
+      .populate('driver', 'fullName profilePicture'); // Assuming 'fullName' and 'profilePicture' are the correct fields in User model
+    res.status(200).json(reservedRides);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error fetching reserved rides' });
+  }
+});
+
+
 app.get("/driver", (req, res) => {
   if(req.isAuthenticated()){
     res.render("driver", {name: req.user.username, picture: req.user.picture, key: process.env.MAPS_API});
@@ -225,7 +269,40 @@ app.get("/driver", (req, res) => {
     res.redirect("/");
   }
 });
+app.post('/reserveRoute', async (req, res) => {
+  // if (!req.isAuthenticated()) {
+  //   return res.status(401).json({ message: 'Unauthorized' });
+  // }
+  console.log("here")
+  req.user = {
+    _id: '6561e1fe89ceaa73da27a0eb'  // TODO: // TODO: Remove this
+  };
+  const { routeId } = req.body; 
 
+  try {
+    
+    const route = await Route.findById(routeId);
+    if (!route) {
+      return res.status(404).json({ message: 'Route not found' });
+    }
+
+    
+    if (route.passengers.includes(req.user._id)) {
+      return res.status(400).json({ message: 'User already reserved this route' });
+    }
+
+    
+    route.passengers.push(req.user._id);
+    
+   
+    await route.save();
+
+    res.status(200).json({ message: 'Ride reserved successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error reserving ride' });
+  }
+});
 app.get("/requestride", (req, res) => {
   if(req.isAuthenticated()){
     const startc = [req.query.slng, req.query.slat];
@@ -272,7 +349,8 @@ app.post("/postroute", async (req, res) => {
       driver: req.user._id,
       driverPicture: req.user.picture,
       start: [req.body.start.lng, req.body.start.lat],
-      end: [req.body.end.lng, req.body.end.lat]
+      end: [req.body.end.lng, req.body.end.lat],
+      time: new Date(req.body.time)
     });
     console.log(newRoute);
     try {

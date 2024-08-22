@@ -178,6 +178,7 @@ function createMap() {
     const eLng = autoDestination.getPlace().geometry.location.lng(); 
     const eLat = autoDestination.getPlace().geometry.location.lat();
     $('#lists').on('click', '#tick', async function() {
+      const routeId = $(this).closest('li').data('routeid');
       const start = [$(this).closest('li').data('startlat'), $(this).closest('li').data('startlng')];
       const end = [$(this).closest('li').data('endlat'), $(this).closest('li').data('endlng')];
       const walkingLine = {
@@ -190,18 +191,35 @@ function createMap() {
         strokeColor: "#000000", 
         strokeWeight: 6
       };
+      try {
+        const response = await $.ajax({
+          type: 'POST',
+          url: '/reserveRoute',
+          data: JSON.stringify({ routeId }),
+          contentType: 'application/json',
+          success: function(response) {
+            console.log('Ride reserved successfully');
+            
+          },
+          error: function(error) {
+            console.error('Error reserving ride:', error);
+            
+          }
+        });
+      } catch (error) {
+        console.error('Error sending reservation request:', error);
+      }
       await drawRoute([sLat,sLng], start, map, "WALKING", true, walkingLine);
       await drawRoute(start, end, map, "DRIVING", false, drivingLine);
       await drawRoute(end, [eLat,eLng], map, "WALKING", true, walkingLine);
     });
-    console.log("where");
     
     //url: `http://localhost:3000/requestride?slat=${sLat}&slng=${sLng}&elat=${eLat}&elng=${eLng}`,
     $.ajax({
       type: 'GET',
       CORS: true,
       secure: true,
-      url: `https://rideealong.co/requestride?slat=${sLat}&slng=${sLng}&elat=${eLat}&elng=${eLng}`, 
+      url: `/requestride?slat=${sLat}&slng=${sLng}&elat=${eLat}&elng=${eLng}`, 
       success: async function(res) {    
         
         //const goodRoutes = await findGoodRoutes(res, autoStart.getPlace().geometry.location, autoDestination.getPlace().geometry.location);  not working now will
@@ -230,6 +248,7 @@ function createMap() {
                     console.log('Distance ok: ', element);
                     console.log(element);
                     const list = `<li class="pb-3 sm:pb-4"
+                            data-routeid="${route.id}"
                             data-startlng="${route.start[0]}"
                             data-startlat="${route.start[1]}"  
                             data-endlng="${route.end[0]}"
