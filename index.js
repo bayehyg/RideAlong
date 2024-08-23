@@ -247,8 +247,11 @@ app.get('/orders/reservedRides', async (req, res) => {
   // if (!req.isAuthenticated()) {
   //   return res.status(401).json({ message: 'Unauthorized' });
   // }
-
-  //const userId = req.user._id;
+  
+  req.user = {
+    _id: '6561eb39658864b2b2a8686f'  // TODO: Remove this
+  };
+  const userId = req.user._id;
 
   try {
     // TODO: change the hardcoded userid to {userId}
@@ -273,9 +276,9 @@ app.post('/reserveRoute', async (req, res) => {
   // if (!req.isAuthenticated()) {
   //   return res.status(401).json({ message: 'Unauthorized' });
   // }
-  console.log("here")
+
   req.user = {
-    _id: '6561e1fe89ceaa73da27a0eb'  // TODO: // TODO: Remove this
+    _id: '6561eb39658864b2b2a8686f'  // TODO: // TODO: Remove this
   };
   const { routeId } = req.body; 
 
