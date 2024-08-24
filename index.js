@@ -200,7 +200,7 @@ app.get('/', (req, res) => {
 });
 app.get("/orders", (req,res) => {
   
-  res.render("rides")
+  res.render("rides", {key: process.env.MAPS_API})
 });
 
 app.get("/auth/google", 
@@ -263,6 +263,63 @@ app.get('/orders/reservedRides', async (req, res) => {
     res.status(500).json({ message: 'Error fetching reserved rides' });
   }
 });
+
+app.delete('/route/:id', async (req, res) => {
+  // if (!req.isAuthenticated()) {
+  //   return res.status(401).json({ message: 'Unauthorized' });
+  // }
+
+  const routeId = req.params.id;
+
+  try {
+    const route = await Route.findById(routeId);
+    if (!route) {
+      return res.status(404).json({ message: 'Route not found' });
+    }
+    if (route.driver.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: 'You are not authorized to delete this route' });
+    }
+    await Route.findByIdAndDelete(routeId);
+    await Driver.findByIdAndUpdate(req.user._id, { $pull: { routes: routeId } });
+
+    res.status(200).json({ message: 'Route deleted successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error deleting route' });
+  }
+});
+
+app.post('/orders/cancelReservation/:id', async (req, res) => {
+  // if (!req.isAuthenticated()) {
+  //   return res.status(401).json({ message: 'Unauthorized' });
+  // }
+
+  req.user = {
+    _id: '6561eb39658864b2b2a8686f'  // TODO: Remove this
+  };
+  const routeId = req.params.id;
+
+  try {
+    const route = await Route.findById(routeId);
+    if (!route) {
+      return res.status(404).json({ message: 'Route not found' });
+    }
+
+    if (!route.passengers.includes(req.user._id)) {
+      return res.status(400).json({ message: 'User has not reserved this route' });
+    }
+
+    route.passengers.pull(req.user._id);
+    await route.save();
+
+    res.status(200).json({ message: 'Ride reservation canceled successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error canceling ride reservation' });
+  }
+});
+
+
 
 
 app.get("/driver", (req, res) => {
