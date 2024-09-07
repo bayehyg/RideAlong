@@ -36,15 +36,15 @@ const uri = `mongodb+srv://getanehyonatan:${process.env.MONGO_PASS}@cluster0.vyc
 
 mongoose.connect(uri);
 
-// TODO: uncomment this
-// const hostName = 'rideealong.co';
-// const httpsOptions = {
-//   cert: fs.readFileSync('./cert.crt'),
-//   ca: fs.readFileSync('./bundle.ca-bundle'),
-//   key: fs.readFileSync('./pvKey.key')
-// };
-//const server = https.createServer(httpsOptions, app);
-const server = http.createServer(app);
+
+const hostName = 'rideealong.co';
+const httpsOptions = {
+  cert: fs.readFileSync('./cert.crt'),
+  ca: fs.readFileSync('./bundle.ca-bundle'),
+  key: fs.readFileSync('./pvKey.key')
+};
+const server = https.createServer(httpsOptions, app);
+//const server = http.createServer(app);
 const userSchema = new mongoose.Schema ({
     name: String,
     picture: String,
@@ -199,8 +199,12 @@ app.get('/', (req, res) => {
   res.render("login");
 });
 app.get("/orders", (req,res) => {
+  if(req.isAuthenticated()){
+    res.render("rides", {key: process.env.MAPS_API})
+  } else {
+    res.redirect("/");
+  }
   
-  res.render("rides", {key: process.env.MAPS_API})
 });
 
 app.get("/auth/google", 
@@ -225,12 +229,12 @@ app.get("/customer", (req, res) => {
 });
 
 app.get('/orders/postedRides', async (req, res) => {
-  // if (!req.isAuthenticated()) {
-  //   return res.status(401).json({ message: 'Unauthorized' });
-  // }
-  req.user = {
-    _id: '6561eb39658864b2b2a8686f'  // TODO: Remove this
-  };
+  if (!req.isAuthenticated()) {
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
+  // req.user = {
+  //   _id: '6561eb39658864b2b2a8686f'  // TODO: Remove this
+  // };
   const userId = req.user._id;
 
   try {
@@ -244,19 +248,19 @@ app.get('/orders/postedRides', async (req, res) => {
 });
 
 app.get('/orders/reservedRides', async (req, res) => {
-  // if (!req.isAuthenticated()) {
-  //   return res.status(401).json({ message: 'Unauthorized' });
-  // }
+  if (!req.isAuthenticated()) {
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
   
-  req.user = {
-    _id: '6561eb39658864b2b2a8686f'  // TODO: Remove this
-  };
+  // req.user = {
+  //   _id: '6561eb39658864b2b2a8686f'  // TODO: Remove this
+  // };
   const userId = req.user._id;
 
   try {
     // TODO: change the hardcoded userid to {userId}
     const reservedRides = await Route.find({ passengers: userId })
-      .populate('driver', 'fullName profilePicture'); // Assuming 'fullName' and 'profilePicture' are the correct fields in User model
+      .populate('driver', 'fullName profilePicture'); 
     res.status(200).json(reservedRides);
   } catch (error) {
     console.error(error);
@@ -265,9 +269,9 @@ app.get('/orders/reservedRides', async (req, res) => {
 });
 
 app.delete('/route/:id', async (req, res) => {
-  // if (!req.isAuthenticated()) {
-  //   return res.status(401).json({ message: 'Unauthorized' });
-  // }
+  if (!req.isAuthenticated()) {
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
 
   const routeId = req.params.id;
 
@@ -290,13 +294,13 @@ app.delete('/route/:id', async (req, res) => {
 });
 
 app.post('/orders/cancelReservation/:id', async (req, res) => {
-  // if (!req.isAuthenticated()) {
-  //   return res.status(401).json({ message: 'Unauthorized' });
-  // }
+  if (!req.isAuthenticated()) {
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
 
-  req.user = {
-    _id: '6561eb39658864b2b2a8686f'  // TODO: Remove this
-  };
+  // req.user = {
+  //   _id: '6561eb39658864b2b2a8686f'  // TODO: Remove this
+  // };
   const routeId = req.params.id;
 
   try {
@@ -330,13 +334,13 @@ app.get("/driver", (req, res) => {
   }
 });
 app.post('/reserveRoute', async (req, res) => {
-  // if (!req.isAuthenticated()) {
-  //   return res.status(401).json({ message: 'Unauthorized' });
-  // }
+  if (!req.isAuthenticated()) {
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
 
-  req.user = {
-    _id: '6561eb39658864b2b2a8686f'  // TODO: // TODO: Remove this
-  };
+  // req.user = {
+  //   _id: '6561eb39658864b2b2a8686f'  // TODO: // TODO: Remove this
+  // };
   const { routeId } = req.body; 
 
   try {
@@ -445,7 +449,7 @@ app.get("/logout", (req, res) => {
 });
 
 // TODO: change to port variable
-server.listen(3000, () => {
-  console.log(`Server running at http://localhost:3000/`);
-  //console.log(`Server running at http://${hostName}:${port}/`);
+server.listen(port, () => {
+  //console.log(`Server running at http://localhost:3000/`);
+  console.log(`Server running at http://${hostName}:${port}/`);
 });
